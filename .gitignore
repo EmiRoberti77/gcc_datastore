@@ -1,4 +1,4 @@
-node_modules
-dist
+node_modules/
+dist/
 emi-gcp-key.json
 emi-gcp-key_old.json
