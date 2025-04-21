@@ -1,11 +1,10 @@
-
 # Importing CSV to Google Cloud Datastore with Node.js
 
 This guide demonstrates how to import data from a CSV file into **Google Cloud Datastore** using Node.js. It also explains how Datastore differs from traditional SQL databases.
 
 ---
 
-## 🧠 Code Summary
+## Code Summary
 
 ### 1. **Libraries and Setup**
 
@@ -71,16 +70,16 @@ Retrieves entities where a specific column matches a filter.
 
 ---
 
-## 🆚 Google Cloud Datastore vs SQL Database
+## Google Cloud Datastore vs SQL Database
 
-| Feature | Google Cloud Datastore | SQL Database |
-|--------|--------------------------|--------------|
-| **Data Model** | NoSQL (Entity-Property) | Relational (Tables/Rows) |
-| **Schema** | Schema-less | Rigid schema with data types |
-| **Scalability** | Automatically scalable | Requires tuning/sharding |
-| **Queries** | Limited (no JOINs, partial filters) | Rich SQL querying |
-| **Transactions** | Limited multi-entity | Full ACID transactions |
-| **Use Case** | Flexible, fast reads (e.g. IoT, apps) | Complex queries & relationships |
+| Feature          | Google Cloud Datastore                | SQL Database                    |
+| ---------------- | ------------------------------------- | ------------------------------- |
+| **Data Model**   | NoSQL (Entity-Property)               | Relational (Tables/Rows)        |
+| **Schema**       | Schema-less                           | Rigid schema with data types    |
+| **Scalability**  | Automatically scalable                | Requires tuning/sharding        |
+| **Queries**      | Limited (no JOINs, partial filters)   | Rich SQL querying               |
+| **Transactions** | Limited multi-entity                  | Full ACID transactions          |
+| **Use Case**     | Flexible, fast reads (e.g. IoT, apps) | Complex queries & relationships |
 
 ---
 
@@ -105,14 +104,17 @@ query('Agency', 'SPARK FOUNDRY');
 ```ts
 async function quickTest() {
   const taskKey = datastore.key(['TestKind', 'test1']);
-  const entity = { key: taskKey, data: { created: new Date(), message: 'Hello Datastore' } };
+  const entity = {
+    key: taskKey,
+    data: { created: new Date(), message: 'Hello Datastore' },
+  };
   await datastore.save(entity);
 }
 ```
 
 ---
 
-## 🗂 File Structure
+## File Structure
 
 ```
 project-root/
@@ -125,12 +127,8 @@ project-root/
 
 ---
 
-## 🚀 Run It
+## Run It
 
 1. Place your CSV and credentials file.
 2. Modify paths as needed.
 3. Run the script with `ts-node` or transpile with `tsc`.
-
----
-
-© MIT License
