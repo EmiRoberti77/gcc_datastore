@@ -4,6 +4,8 @@ import csv from 'csv-parser';
 import { Datastore } from '@google-cloud/datastore';
 import { CampaignSchema } from './models/campaignSchema';
 
+const FILE_CODE = 'Film Code';
+const FILMCODE = 'Filmcode';
 const csv_file = 'CommercialDBFile_250207.csv';
 const UP = '..';
 const csv_path = path.join(__dirname, UP, csv_file);
@@ -61,12 +63,12 @@ async function query(column: string, filter: string): Promise<any[]> {
 
 async function saveToDatastore(data: CampaignSchema[]) {
   const tasks = data.map((row) => {
-    const key = datastore.key([kind, row['Film Code']]);
+    const key = datastore.key([kind, row[FILE_CODE]]);
 
     const entity = {
       key,
       data: Object.entries(row).map(([name, value]) => ({
-        name,
+        name: name === FILE_CODE ? FILMCODE : name,
         value,
       })),
     };
@@ -78,12 +80,63 @@ async function saveToDatastore(data: CampaignSchema[]) {
   console.log(`${tasks.length} entities saved to Datastore.`);
 }
 
-async function main() {
-  const data = await parseCSV(csv_path);
-  await saveToDatastore(data);
+async function getByKey(filmcode: string) {
+  const key = datastore.key([kind, filmcode]);
+  console.log(`key=${JSON.stringify(key)}`);
+  const [entity] = await datastore.get(key);
+  if (entity) console.log('entity found');
+  else console.log('entity not found');
+  return entity;
 }
 
-//main();
-query('Agency', 'SPARK FOUNDRY')
-  .then((success) => console.log(success))
-  .catch((err) => console.log(err));
+async function updateEntityByKey(
+  filmcode: string,
+  updates: Partial<Record<string, any>>
+) {
+  const key = datastore.key([kind, filmcode]);
+  const [entity] = await datastore.get(key);
+
+  if (!entity) {
+    console.log(`Entity with key ${filmcode} not found.`);
+    return;
+  }
+
+  // Apply updates
+  for (const [field, value] of Object.entries(updates)) {
+    entity[field] = value;
+  }
+
+  await datastore.save({ key, data: entity });
+  console.log(`Entity with key ${filmcode} updated.`);
+}
+
+async function main(
+  parseNewFile: boolean,
+  runQuery: false,
+  readByKey: boolean
+) {
+  console.log('main(start)');
+  if (parseNewFile) {
+    console.log('parsing CSV');
+    const data = await parseCSV(csv_path);
+    await saveToDatastore(data);
+  }
+  if (runQuery) {
+    console.log('running query');
+    const queryResponse = await query('Agency', 'SPARK FOUNDRY');
+    console.log(queryResponse);
+  }
+  if (readByKey) {
+    console.log('access by key');
+    const entity_1 = await getByKey('AMVDNEE884030');
+    console.log(entity_1);
+    await updateEntityByKey('AMVDNEE884030', {
+      Status: 'update',
+      Campaign: 'Q2 Push',
+    });
+    const entity_2 = await getByKey('AMVDNEE884030');
+    console.log(entity_2);
+  }
+  console.log('main(complete)');
+}
+main(true, false, false);

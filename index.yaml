@@ -1,0 +1,5 @@
+indexes:
+  - kind: trp_event_groups_campaigns
+    properties:
+      - name: Filmcode
+        direction: asc
