@@ -127,6 +127,53 @@ project-root/
 
 ---
 
+## Indexes how they work
+
+To index a column the header must be a single word. 'Filmcode' our access column is 'Film code'
+
+a sample script for in running the index script
+
+```bash
+gcloud datastore indexes create index.yaml
+```
+
+- index.yaml
+
+```bash
+indexes:
+  - kind: trp_event_groups_campaigns
+    properties:
+      - name: Filmcode
+        direction: asc
+```
+
+IMPORT ( the index dos not make the column unique) it improves the speed of the query
+
+to have a unique column you have to use the KEY=dataset
+
+```typescript
+async function saveToDatastore(data: CampaignSchema[]) {
+  const tasks = data.map((row) => {
+    //KEY DATASET
+    //this sets the row identifier
+    const key = datastore.key([kind, row[FILE_CODE]]);
+
+    const entity = {
+      key,
+      data: Object.entries(row).map(([name, value]) => ({
+        name: name === FILE_CODE ? FILMCODE : name,
+        value,
+      })),
+    };
+
+    return datastore.save(entity);
+  });
+
+  await Promise.all(tasks);
+  console.log(`${tasks.length} entities saved to Datastore.`);
+}
+```
+
 ## Run It
 
 1. Place your CSV and credentials file.
