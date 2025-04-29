@@ -110,8 +110,17 @@ async function updateEntityByKey(
   console.log(`Entity with key ${filmcode} updated.`);
 }
 
+async function addDefaultColumns(data: any[]): Promise<any[]> {
+  return data.map((row) => ({
+    ...row,
+    MBO_EDP1: 'false',
+    MBO_EDP1_Action: 'append',
+  }));
+}
+
 async function main(
   parseNewFile: boolean,
+  addExtraColumns: boolean,
   runQuery: false,
   readByKey: boolean
 ) {
@@ -119,6 +128,11 @@ async function main(
   if (parseNewFile) {
     console.log('parsing CSV');
     const data = await parseCSV(csv_path);
+    await saveToDatastore(data);
+  }
+  if (addExtraColumns) {
+    let data = await parseCSV(csv_path);
+    data = await addDefaultColumns(data);
     await saveToDatastore(data);
   }
   if (runQuery) {
@@ -131,12 +145,12 @@ async function main(
     const entity_1 = await getByKey('AMVDNEE884030');
     console.log(entity_1);
     await updateEntityByKey('AMVDNEE884030', {
-      Status: 'update',
-      Campaign: 'Q2 Push',
+      MBO_EDP1: 'NEW',
+      Action_MBO_EDP1: 'Q2 Push',
     });
     const entity_2 = await getByKey('AMVDNEE884030');
     console.log(entity_2);
   }
   console.log('main(complete)');
 }
-main(true, false, false);
+main(false, true, false, false);
